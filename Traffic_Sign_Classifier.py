@@ -9,7 +9,7 @@ from sklearn.utils import shuffle
 
 
 
-EPOCHS = 10
+EPOCHS = 100
 BATCH_SIZE = 128
 
 # TODO: Fill this in based on where you saved the training and testing data
@@ -31,16 +31,12 @@ X_test, y_test = test['features'], test['labels']
 
 
 
-# TODO: Number of training examples
 n_train = X_train.shape[0]
 
-# TODO: Number of testing examples.
 n_test = X_test.shape[0]
 
-# TODO: What's the shape of an traffic sign image?
 image_shape = list(X_train.shape[1:4])
 
-# TODO: How many unique classes/labels there are in the dataset.
 total=np.concatenate([y_train , y_valid , y_test])
 n_classes = np.max(total)-np.min(total)+1
 
@@ -61,8 +57,6 @@ plt.imshow(image)
 print(y_train[index])
 
 
-
-
 # Image data shape = [32, 32, 3]
 # Number of classes = 43
 def LeNet(x):
@@ -70,49 +64,51 @@ def LeNet(x):
     mu = 0
     sigma = 0.1
 
-    # SOLUTION: Layer 1: Convolutional. Input = 32x32x1. Output = 28x28x6.
-    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 1, 6), mean=mu, stddev=sigma))
-    conv1_b = tf.Variable(tf.zeros(6))
+    # SOLUTION: Layer 1: Convolutional. Input = 32x32x3. Output = 28x28x18.
+    out1_d=18
+    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 3, out1_d), mean=mu, stddev=sigma))
+    conv1_b = tf.Variable(tf.zeros(out1_d))
     conv1 = tf.nn.conv2d(x, conv1_W, strides=[1, 1, 1, 1], padding='VALID') + conv1_b
 
     # SOLUTION: Activation.
     conv1 = tf.nn.relu(conv1)
 
-    # SOLUTION: Pooling. Input = 28x28x6. Output = 14x14x6.
+    # SOLUTION: Pooling. Input = 28x28x18. Output = 14x14x18.
     conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
-    # SOLUTION: Layer 2: Convolutional. Output = 10x10x16.
-    conv2_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 6, 16), mean=mu, stddev=sigma))
-    conv2_b = tf.Variable(tf.zeros(16))
+    # SOLUTION: Layer 2: Convolutional. Input = 14x14x18. Output = 10x10x36.
+    out2_d = 36
+    conv2_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 18, out2_d), mean=mu, stddev=sigma))
+    conv2_b = tf.Variable(tf.zeros(out2_d))
     conv2 = tf.nn.conv2d(conv1, conv2_W, strides=[1, 1, 1, 1], padding='VALID') + conv2_b
 
     # SOLUTION: Activation.
     conv2 = tf.nn.relu(conv2)
 
-    # SOLUTION: Pooling. Input = 10x10x16. Output = 5x5x16.
+    # SOLUTION: Pooling. Input = 10x10x36. Output = 5x5x36.
     conv2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
-    # SOLUTION: Flatten. Input = 5x5x16. Output = 400.
+    # SOLUTION: Flatten. Input = 5x5x36. Output = 900.
     fc0 = flatten(conv2)
 
-    # SOLUTION: Layer 3: Fully Connected. Input = 400. Output = 120.
-    fc1_W = tf.Variable(tf.truncated_normal(shape=(400, 120), mean=mu, stddev=sigma))
-    fc1_b = tf.Variable(tf.zeros(120))
+    # SOLUTION: Layer 3: Fully Connected. Input = 900. Output = 600.
+    fc1_W = tf.Variable(tf.truncated_normal(shape=(900, 600), mean=mu, stddev=sigma))
+    fc1_b = tf.Variable(tf.zeros(600))
     fc1 = tf.matmul(fc0, fc1_W) + fc1_b
 
     # SOLUTION: Activation.
     fc1 = tf.nn.relu(fc1)
 
-    # SOLUTION: Layer 4: Fully Connected. Input = 120. Output = 84.
-    fc2_W = tf.Variable(tf.truncated_normal(shape=(120, 84), mean=mu, stddev=sigma))
-    fc2_b = tf.Variable(tf.zeros(84))
+    # SOLUTION: Layer 4: Fully Connected. Input = 600. Output = 300.
+    fc2_W = tf.Variable(tf.truncated_normal(shape=(600, 100), mean=mu, stddev=sigma))
+    fc2_b = tf.Variable(tf.zeros(100))
     fc2 = tf.matmul(fc1, fc2_W) + fc2_b
 
     # SOLUTION: Activation.
     fc2 = tf.nn.relu(fc2)
 
-    # SOLUTION: Layer 5: Fully Connected. Input = 84. Output = 10.
-    fc3_W = tf.Variable(tf.truncated_normal(shape=(84, n_classes), mean=mu, stddev=sigma))
+    # SOLUTION: Layer 5: Fully Connected. Input = 100. Output = 10.
+    fc3_W = tf.Variable(tf.truncated_normal(shape=(100, n_classes), mean=mu, stddev=sigma))
     fc3_b = tf.Variable(tf.zeros(n_classes))
     logits = tf.matmul(fc2, fc3_W) + fc3_b
 
@@ -125,8 +121,8 @@ one_hot_y = tf.one_hot(y, n_classes)
 
 rate = 0.001
 
-logits = LeNet(tf.image.rgb_to_grayscale(x))
-cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
+logits = LeNet(x)
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=one_hot_y)
 loss_operation = tf.reduce_mean(cross_entropy)
 optimizer = tf.train.AdamOptimizer(learning_rate = rate)
 training_operation = optimizer.minimize(loss_operation)
