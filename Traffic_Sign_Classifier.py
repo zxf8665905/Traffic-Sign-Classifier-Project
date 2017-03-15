@@ -145,32 +145,36 @@ def evaluate(X_data, y_data):
 
 
 
-X_train, y_train = shuffle(X_train, y_train)
+def train():
+    # Train the Model
+    global X_train,y_train
 
-# Train the Model
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    num_examples = len(X_train)
+    X_train, y_train = shuffle(X_train, y_train)
 
-    print("Training...")
-    print()
-    for i in range(EPOCHS):
-        X_train, y_train = shuffle(X_train, y_train)
-        for offset in range(0, num_examples, BATCH_SIZE):
-            end = offset + BATCH_SIZE
-            batch_x, batch_y = X_train[offset:end], y_train[offset:end]
-            sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        num_examples = len(X_train)
 
-        validation_accuracy = evaluate(X_valid, y_valid)
-        print("EPOCH {} ...".format(i + 1))
-        print("Validation Accuracy = {:.3f}".format(validation_accuracy))
+        print("Training...")
         print()
+        for i in range(EPOCHS):
+            X_train, y_train = shuffle(X_train, y_train)
+            for offset in range(0, num_examples, BATCH_SIZE):
+                end = offset + BATCH_SIZE
+                batch_x, batch_y = X_train[offset:end], y_train[offset:end]
+                sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
 
-    saver.save(sess, './lenet')
-    print("Model saved")
+            validation_accuracy = evaluate(X_valid, y_valid)
+            print("EPOCH {} ...".format(i + 1))
+            print("Validation Accuracy = {:.3f}".format(validation_accuracy))
+            print()
 
-with tf.Session() as sess:
-    saver.restore(sess, tf.train.latest_checkpoint('.'))
+        saver.save(sess, './lenet')
+        print("Model saved")
 
-    test_accuracy = evaluate(X_test, y_test)
-    print("Test Accuracy = {:.3f}".format(test_accuracy))
+def runTestSet():
+    with tf.Session() as sess:
+        saver.restore(sess, tf.train.latest_checkpoint('.'))
+
+        test_accuracy = evaluate(X_test, y_test)
+        print("Test Accuracy = {:.3f}".format(test_accuracy))
