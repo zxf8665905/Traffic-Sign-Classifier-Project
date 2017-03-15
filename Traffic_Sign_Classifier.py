@@ -1,4 +1,6 @@
 
+#TODO: AUGMENT THE TRAINING  DATA
+# Augmenting the training set might help improve model performance. Common data augmentation techniques include rotation, translation, zoom, flips, and/or color perturbation. These techniques can be used individually or combined.
 
 # Load pickled data
 import pickle
@@ -11,8 +13,6 @@ from sklearn.utils import shuffle
 
 EPOCHS = 100
 BATCH_SIZE = 128
-
-# TODO: Fill this in based on where you saved the training and testing data
 
 training_file = './traffic-signs-data/train.p'
 validation_file= './traffic-signs-data/valid.p'
